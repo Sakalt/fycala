@@ -12,9 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function highlightCode(code) {
         const highlighted = code
             .replace(/(\d+)/g, '<span class="number">$1</span>')
-            .replace(/(\bfunction\b)/g, '<span class="function">$1</span>')
-            .replace(/(\bwindow\.addEventListener\b)/g, '<span class="event">$1</span>')
-            .replace(/(\bvar\b|\blet\b|\bconst\b|\b[a-zA-Z_]\w*\b)/g, '<span class="variable">$1</span>');
+            .replace(/(\bfunction\b|\bdef\b)/g, '<span class="function">$1</span>')
+            .replace(/(\bif\b|\belse\b)/g, '<span class="event">$1</span>')
+            .replace(/(\bfor\b|\bin\b|range\b)/g, '<span class="event">$1</span>')
+            .replace(/(\blet\b|\bconst\b|\bvar\b|\b[a-zA-Z_]\w*\b)/g, '<span class="variable">$1</span>');
 
         return highlighted;
     }
@@ -40,7 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
         output.innerHTML = ''; // Clear previous output
         try {
             // Replace 'print' function with customPrint
-            const code = codeArea.value.replace(/\bprint\((.*)\);?/g, 'customPrint($1);');
+            let code = codeArea.value
+                .replace(/def\s+(\w+)\(([^)]*)\):\s*([\s\S]*?)(?=def\s|\s*$)/g, 'function $1($2) { $3 }')
+                .replace(/(\bprint\(([^)]*)\);?)/g, 'customPrint($2);');
             
             // Evaluate the code in a sandboxed environment
             const result = new Function('customPrint', code);
