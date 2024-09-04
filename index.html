@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,13 +9,12 @@
             font-family: Arial, sans-serif;
         }
 
-        #codeInput {
+        #codeArea {
             width: 100%;
             height: 200px;
             font-family: monospace;
             border: 1px solid #ccc;
             padding: 10px;
-            box-sizing: border-box;
         }
 
         #saveButton, #runButton {
@@ -28,7 +27,6 @@
             border: 1px solid #ccc;
             padding: 10px;
             background: #f9f9f9;
-            overflow: auto;
         }
 
         #output {
@@ -52,67 +50,63 @@
         .variable {
             color: green;
         }
-
-        .string {
-            color: orange;
-        }
     </style>
 </head>
 <body>
-    <textarea id="codeInput" placeholder="コードをここに入力..."></textarea>
+    <textarea id="codeArea" placeholder="コードをここに入力..."></textarea>
     <button id="saveButton">コードを保存</button>
     <button id="runButton">コードを実行</button>
-    <pre id="highlightedCode"></pre>
+    <div id="highlightedCode"></div>
     <div id="output"></div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const codeInput = document.getElementById('codeInput');
+            const codeArea = document.getElementById('codeArea');
             const saveButton = document.getElementById('saveButton');
             const runButton = document.getElementById('runButton');
             const highlightedCode = document.getElementById('highlightedCode');
             const output = document.getElementById('output');
 
             // ローカルストレージから保存されたコードを読み込む
-            codeInput.value = localStorage.getItem('code') || '';
+            codeArea.value = localStorage.getItem('code') || '';
 
-            // コードのハイライト処理
+            // コードをハイライトする関数
             function highlightCode(code) {
                 const highlighted = code
-                    .replace(/(".*?")/g, '<span class="string">$1</span>') // 文字列リテラル
-                    .replace(/(\d+)/g, '<span class="number">$1</span>')
-                    .replace(/(\bfunction\b|\bdef\b|\bclass\b|\bimport\b|\bexport\b|\bmodule\b|\bnamespace\b)/g, '<span class="function">$1</span>')
-                    .replace(/(\bif\b|\belse\b|\bwhile\b|\bfor\b|\btry\b|\bcatch\b|\bswitch\b|\bcase\b)/g, '<span class="event">$1</span>')
-                    .replace(/(\blet\b|\bconst\b|\bvar\b|\b[a-zA-Z_]\w*\b)/g, '<span class="variable">$1</span>');
+                    .replace(/(\d+)/g, '<span class="number">$1</span>') // 数字
+                    .replace(/(\bfunction\b|\bdef\b|function\s+\w+|\bclass\b)/g, '<span class="function">$1</span>') // 関数やクラス
+                    .replace(/(\bif\b|\belse\b|\bfor\b|\bwhile\b|\bin\b|range\b)/g, '<span class="event">$1</span>') // 制御構造
+                    .replace(/(\blet\b|\bconst\b|\bvar\b|\b[a-zA-Z_]\w*\b)/g, '<span class="variable">$1</span>'); // 変数
 
                 return highlighted;
             }
 
-            // ハイライトを更新する
+            // ハイライトを更新する関数
             function updateHighlight() {
-                highlightedCode.innerHTML = highlightCode(codeInput.value);
+                highlightedCode.innerHTML = highlightCode(codeArea.value);
             }
 
-            // カスタムのprint関数
+            // カスタム print 関数
             function customPrint(message) {
                 output.textContent += message + '\n';
             }
 
-            // コードをローカルストレージに保存する
+            // コードをローカルストレージに保存
             saveButton.addEventListener('click', () => {
-                localStorage.setItem('code', codeInput.value);
+                localStorage.setItem('code', codeArea.value);
                 updateHighlight();
             });
 
-            // コードを実行する
+            // コードを実行
             runButton.addEventListener('click', () => {
-                output.innerHTML = ''; // 前回の出力をクリア
+                output.innerHTML = ''; // 前の出力をクリア
                 try {
-                    // 'print'関数をcustomPrintに置き換える
-                    let code = codeInput.value
+                    // 'print' 関数を customPrint に置き換え
+                    let code = codeArea.value
                         .replace(/def\s+(\w+)\(([^)]*)\):\s*([\s\S]*?)(?=def\s|\s*$)/g, 'function $1($2) { $3 }')
                         .replace(/(\bprint\(([^)]*)\);?)/g, 'customPrint($2);');
                     
-                    // サンドボックス化された環境でコードを評価する
+                    // サンドボックス環境でコードを評価
                     const result = new Function('customPrint', code);
                     result(customPrint);
                 } catch (error) {
@@ -120,11 +114,11 @@
                 }
             });
 
-            // 初期ハイライト
+            // 初回のハイライト
             updateHighlight();
 
             // コード入力の変更に応じてハイライトを更新
-            codeInput.addEventListener('input', updateHighlight);
+            codeArea.addEventListener('input', updateHighlight);
         });
     </script>
 </body>
