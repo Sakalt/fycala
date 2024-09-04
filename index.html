@@ -53,10 +53,6 @@
             color: green;
         }
 
-        .keyword {
-            color: purple;
-        }
-
         .string {
             color: orange;
         }
@@ -82,12 +78,11 @@
             // コードのハイライト処理
             function highlightCode(code) {
                 const highlighted = code
-                    .replace(/"(.*?)"/g, '<span class="string">"$1"</span>')  // 文字列リテラルのハイライト
-                    .replace(/(\d+)/g, '<span class="number">$1</span>')  // 数字のハイライト
-                    .replace(/(\bfunction\b|\bdef\b)/g, '<span class="function">$1</span>')  // 関数キーワードのハイライト
-                    .replace(/(\bif\b|\belse\b|\bwhile\b|\bfor\b|\btry\b|\bcatch\b|\breturn\b|\bbreak\b|\bcontinue\b)/g, '<span class="event">$1</span>')  // 制御構文のハイライト
-                    .replace(/(\blet\b|\bconst\b|\bvar\b|\b[a-zA-Z_]\w*\b)/g, '<span class="variable">$1</span>')  // 変数のハイライト
-                    .replace(/(\bclass\b|\bimport\b|\bexport\b|\bmodule\b|\bnamespace\b)/g, '<span class="keyword">$1</span>');  // その他のキーワードのハイライト
+                    .replace(/(".*?")/g, '<span class="string">$1</span>') // 文字列リテラル
+                    .replace(/(\d+)/g, '<span class="number">$1</span>')
+                    .replace(/(\bfunction\b|\bdef\b|\bclass\b|\bimport\b|\bexport\b|\bmodule\b|\bnamespace\b)/g, '<span class="function">$1</span>')
+                    .replace(/(\bif\b|\belse\b|\bwhile\b|\bfor\b|\btry\b|\bcatch\b|\bswitch\b|\bcase\b)/g, '<span class="event">$1</span>')
+                    .replace(/(\blet\b|\bconst\b|\bvar\b|\b[a-zA-Z_]\w*\b)/g, '<span class="variable">$1</span>');
 
                 return highlighted;
             }
@@ -115,8 +110,7 @@
                     // 'print'関数をcustomPrintに置き換える
                     let code = codeInput.value
                         .replace(/def\s+(\w+)\(([^)]*)\):\s*([\s\S]*?)(?=def\s|\s*$)/g, 'function $1($2) { $3 }')
-                        .replace(/(\bprint\(([^)]*)\);?)/g, 'customPrint($2);')
-                        .replace(/(\bconsole\.log\(([^)]*)\);?)/g, 'customPrint($2);');  // console.logもサポート
+                        .replace(/(\bprint\(([^)]*)\);?)/g, 'customPrint($2);');
                     
                     // サンドボックス化された環境でコードを評価する
                     const result = new Function('customPrint', code);
